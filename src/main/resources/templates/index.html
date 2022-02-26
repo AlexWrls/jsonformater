@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="https://codemirror.net/lib/codemirror.css"></link>
+    <link rel="stylesheet" type="text/css" href="https://codemirror.net/theme/abbott.css"></link>
+
+</head>
+<body>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b>Json</b>
+                    <span>
+                    <button class="btn-sm btn-secondary" id="btn-tab-print" onclick="tab_print()">TabPrint</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,+1)">A+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,-1)">A-</button>
+                    <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_size()">size-</button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="json" class="form-label">Json</label>
+                    <textarea class="form-control" id="json" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-1">
+            <button class="btn-sm btn-dark mt-5" id="btn-json" onclick="json_to_table()">table-></button>
+            <button class="btn-sm btn-dark mt-2 mb-5" id="btn-table" onclick="table_to_json()"><-json></button>
+        </div>
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b>Table</b>
+                    <span>
+                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,+1)">A+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(1,-1)">A-</button>
+                     <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_size()">size-</button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="table" class="form-label">Table</label>
+                    <textarea class="form-control" id="table" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Вариант 1: пакет Bootstrap с Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-gtEjrD/SeCtmISkJkNUaaKMoLD0//ElJ19smozuHV6z3Iehds+3Ulb9Bn9Plx0x4"
+        crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+<script language="javascript" type="text/javascript" src="https://codemirror.net/lib/codemirror.js"></script>
+<script language="javascript" type="text/javascript" src="https://codemirror.net/mode/perl/perl.js"></script>
+<script>
+    let table
+    let json
+    window.onload = function (event) {
+       table  = CodeMirror.fromTextArea(document.getElementById('table'), {
+            lineNumbers: true,
+        });
+
+
+      json = CodeMirror.fromTextArea(document.getElementById('json'), {
+            lineNumbers: true,
+        });
+        table.setSize(530, 600);
+        json.setSize(530, 600);
+    }
+
+
+    function change_size(event) {
+        if (event ==='+'){
+            json.setSize(1200, 600);
+            table.setSize(1200, 600);
+        } else {
+            table.setSize(530, 600);
+            json.setSize(530, 600);
+        }
+    }
+
+    function change_text_size(elementNumber, step) {
+        let el = document.getElementsByClassName('CodeMirror cm-s-default')[elementNumber];
+        let style = window.getComputedStyle(el, null).getPropertyValue('font-size');
+        let fontSize = parseFloat(style);
+        el.style.fontSize = (fontSize + step) + 'px';
+    }
+
+    function tab_print() {
+        let jsonObj = JSON.stringify(JSON.parse(json.getValue()), undefined, 4);
+        $('#json').val(jsonObj);
+        json.getDoc().setValue(jsonObj);
+
+    }
+
+    function json_to_table() {
+        let data = {};
+        data["jsonData"] = json.getValue();
+        $('#btn-json').prop('disabled', true)
+        $('#btn-table').prop('disabled', true)
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "/json_to_data_table",
+            data: JSON.stringify(data),
+            dataType: 'json',
+            timeout: 600000,
+            success: function (data) {
+                console.log("SUCCESS : ", data);
+                $('#table').val(data.jsonData)
+                $('#btn-json').prop('disabled', false)
+                $('#btn-table').prop('disabled', false)
+                table.getDoc().setValue(data.jsonData);
+            },
+            error: function (e) {
+                console.log("ERROR: ", e);
+                $('#btn-json').prop('disabled', false)
+                $('#btn-table').prop('disabled', false)
+            }
+        });
+    }
+
+    function table_to_json() {
+        let data = {};
+        data["jsonData"] = table.getValue();
+        $('#btn-json').prop('disabled', true)
+        $('#btn-table').prop('disabled', true)
+        $.ajax({
+            type: "POST",
+            contentType: "application/json",
+            url: "/data_table_to_json",
+            data: JSON.stringify(data),
+            dataType: 'json',
+            timeout: 600000,
+            success: function (data) {
+                console.log("SUCCESS : ", data);
+                $('#json').val(data.jsonData)
+                $('#btn-json').prop('disabled', false)
+                $('#btn-table').prop('disabled', false)
+                json.getDoc().setValue(data.jsonData);
+            },
+            error: function (e) {
+                console.log("ERROR: ", e);
+                $('#btn-json').prop('disabled', false)
+                $('#btn-table').prop('disabled', false)
+            }
+        });
+    }
+</script>
+</body>
+</html>
