@@ -10,6 +10,7 @@ import ru.taa.jsonformater.dto.JsonRs;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -50,15 +51,8 @@ public class JsonToDataTableService {
 //            final String key = iterator.previous();
             Object value = obj.get(key);
             if (value instanceof JSONObject) {
-                path.add(key);
-                iObj++;
-                if (path.size() > iObj) {
-                    path.subList(iObj - 1, path.size() - 1).clear();
-                }
-                if (iObj > path.size()) {
-                    iObj = path.size();
-                }
-                incrementValue((JSONObject) value, map, path, iObj);
+                incrementObject((JSONObject) value, key, path, map, iObj);
+//                incrementValue((JSONObject) value, map, path, iObj);
             } else if (value instanceof JSONArray) {
                 incrementArray(value, key, path, map, iObj);
             } else {
@@ -68,6 +62,18 @@ public class JsonToDataTableService {
             }
 
         }
+    }
+
+    private void incrementObject(JSONObject value, String key, List<String> path, Map<String, String> map, int iObj) {
+        path.add(key);
+        iObj++;
+        if (path.size() > iObj) {
+            path.subList(iObj - 1, path.size() - 1).clear();
+        }
+        if (iObj > path.size()) {
+            iObj = path.size();
+        }
+        incrementValue(value, map, path, iObj);
     }
 
     private void incrementArray(Object value, String key, List<String> path, Map<String, String> map, int iObj) {
