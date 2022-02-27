@@ -21,6 +21,7 @@
                     <b>Json</b>
                     <span>
                     <button class="btn-sm btn-secondary" id="btn-tab-print" onclick="tab_print()">TabPrint</button>
+                    <button class="btn-sm btn-secondary" onclick="copy_json_value()">Copy</button>
                     <button class="btn-sm btn-secondary" onclick="change_text_size(0,+1)">A+</button>
                     <button class="btn-sm btn-secondary" onclick="change_text_size(0,-1)">A-</button>
                     <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
@@ -28,7 +29,7 @@
                     </span>
                 </div>
                 <div class="card-body">
-                    <label for="json" class="form-label">Json</label>
+                    <label for="json" id="json-label" class="form-label">Json</label>
                     <textarea class="form-control" id="json" rows="25"></textarea>
                 </div>
             </div>
@@ -42,6 +43,7 @@
                 <div class="card-header" style="justify-content: space-between;display: flex">
                     <b>Table</b>
                     <span>
+                      <button class="btn-sm btn-secondary" onclick="copy_table_value()">Copy</button>
                      <button class="btn-sm btn-secondary" onclick="change_text_size(1,+1)">A+</button>
                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,-1)">A-</button>
                      <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
@@ -49,7 +51,7 @@
                     </span>
                 </div>
                 <div class="card-body">
-                    <label for="table" class="form-label">Table</label>
+                    <label for="table" id="table-label" class="form-label">Table</label>
                     <textarea class="form-control" id="table" rows="25"></textarea>
                 </div>
             </div>
@@ -69,21 +71,48 @@
     let table
     let json
     window.onload = function (event) {
-       table  = CodeMirror.fromTextArea(document.getElementById('table'), {
+        table = CodeMirror.fromTextArea(document.getElementById('table'), {
             lineNumbers: true,
         });
 
 
-      json = CodeMirror.fromTextArea(document.getElementById('json'), {
+        json = CodeMirror.fromTextArea(document.getElementById('json'), {
             lineNumbers: true,
         });
         table.setSize(530, 600);
         json.setSize(530, 600);
     }
 
+    function copy_json_value() {
+        let text = json.getValue();
+        copyToClipboard(text, 'json-label')
+    }
+
+    function copy_table_value() {
+        let text = table.getValue();
+        copyToClipboard(text, 'table-label')
+    }
+
+    function copyToClipboard(str, infoLabel) {
+        let area = document.createElement('textarea');
+        document.body.appendChild(area);
+        area.value = str;
+        area.select();
+        document.execCommand("copy");
+        document.body.removeChild(area);
+        $('<span>', {
+            id: 'info'
+        }).appendTo('#' + infoLabel)
+        let info = document.getElementById('info');
+        info.style.color = 'green'
+        info.textContent = ' Скопировано'
+        setTimeout(function () {
+            $('#info')[0].remove()
+        }, 1500);
+    }
 
     function change_size(event) {
-        if (event ==='+'){
+        if (event === '+') {
             json.setSize(1200, 600);
             table.setSize(1200, 600);
         } else {
