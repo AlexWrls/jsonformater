@@ -24,8 +24,8 @@
                     <button class="btn-sm btn-secondary" onclick="copy_json_value()">Copy</button>
                     <button class="btn-sm btn-secondary" onclick="change_text_size(0,+1)">A+</button>
                     <button class="btn-sm btn-secondary" onclick="change_text_size(0,-1)">A-</button>
-                    <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
-                    <button class="btn-sm btn-secondary" onclick="change_size()">size-</button>
+                    <button class="btn-sm btn-secondary" id="btn-json-max" onclick="change_size('+')"><b>[<->]</b></button>
+                    <button class="btn-sm btn-secondary" style="display: none" id="btn-json-min" onclick="change_size()"><b>->[]<-</b></button>
                     </span>
                 </div>
                 <div class="card-body">
@@ -35,8 +35,8 @@
             </div>
         </div>
         <div class="col-1">
-            <button class="btn-sm btn-dark mt-5" id="btn-json" onclick="json_to_table()">table-></button>
-            <button class="btn-sm btn-dark mt-2 mb-5" id="btn-table" onclick="table_to_json()"><-json></button>
+            <button class="btn-sm btn-dark mt-5" style="width: 100%" id="btn-json" onclick="json_to_table()"><b>table-></b></button>
+            <button class="btn-sm btn-dark mt-2 mb-5" style="width: 100%" id="btn-table" onclick="table_to_json()"><b><-json</b></button>
         </div>
         <div class="col">
             <div class="card text-dark bg-light">
@@ -46,8 +46,8 @@
                      <button class="btn-sm btn-secondary" onclick="copy_table_value()">Copy</button>
                      <button class="btn-sm btn-secondary" onclick="change_text_size(1,+1)">A+</button>
                      <button class="btn-sm btn-secondary" onclick="change_text_size(1,-1)">A-</button>
-                     <button class="btn-sm btn-secondary" onclick="change_size('+')">size+</button>
-                     <button class="btn-sm btn-secondary" onclick="change_size()">size-</button>
+                     <button class="btn-sm btn-secondary" id="btn-table-max" onclick="change_size('+')"><b>[<->]</b></button>
+                     <button class="btn-sm btn-secondary" style="display: none" id="btn-table-min" onclick="change_size()"><b>->[]<-</b></button>
                     </span>
                 </div>
                 <div class="card-body">
@@ -115,9 +115,17 @@
         if (event === '+') {
             json.setSize(1200, 600);
             table.setSize(1200, 600);
+            $('#btn-table-max').hide()
+            $('#btn-json-max').hide()
+            $('#btn-table-min').show()
+            $('#btn-json-min').show()
         } else {
             table.setSize(530, 600);
             json.setSize(530, 600);
+            $('#btn-table-min').hide()
+            $('#btn-json-min').hide()
+            $('#btn-json-max').show()
+            $('#btn-table-max').show()
         }
     }
 
