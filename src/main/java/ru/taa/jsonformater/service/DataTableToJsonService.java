@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.taa.jsonformater.dto.JsonRs;
 
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,20 +29,23 @@ public class DataTableToJsonService {
 
     public JsonRs format(String table) {
         try {
-            Map<String, String> tables = new LinkedHashMap<>();
-            if (table.contains("\n")) {
-                String[] lines = table.split("\n");
-                for (String line : lines) {
-                    String[] item = line.split("\\|");
-                    tables.put(item[1].replaceAll("\\s|\\n", ""), item[2].replaceAll("\\s|\\n", ""));
-                }
-            }
-            String resultJson = bind("{}", tables);
+            String resultJson = bind("{}", prepareData(table));
             return JsonRs.builder().jsonData(resultJson).build();
         } catch (Exception e) {
             return JsonRs.builder().jsonData("Ошибка разбора проверьте данные").build();
         }
+    }
 
+    public Map<String, String> prepareData(String data) {
+        Map<String, String> tables = new LinkedHashMap<>();
+        if (data.contains("\n")) {
+            String[] lines = data.split("\n");
+            for (String line : lines) {
+                String[] item = line.split("\\|");
+                tables.put(item[1].replaceAll("\\s|\\n", ""), item[2].replaceAll("\\s|\\n", ""));
+            }
+        }
+        return tables;
     }
 
     private String bind(String content, Map<String, String> params) {
