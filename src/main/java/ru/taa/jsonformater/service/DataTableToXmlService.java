@@ -97,9 +97,9 @@ public class DataTableToXmlService  {
             StringWriter sw = new StringWriter();
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
-//            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-//            transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
-//            transformer.setOutputProperty(OutputKeys.ENCODING, "windows-1251");
+            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
+            transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
+            transformer.setOutputProperty(OutputKeys.ENCODING, "windows-1251");
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
             return sw.toString();
         } catch (Exception e) {

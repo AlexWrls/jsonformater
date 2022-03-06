@@ -8,29 +8,24 @@ import org.springframework.stereotype.Service;
 import ru.taa.jsonformater.dto.JsonRs;
 import ru.taa.jsonformater.utils.FormatUtils;
 
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 @Service
 public class JsonToDataTableService {
 
-    private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
 
     public JsonRs format(String message) {
         try {
             String normalizeJson = FormatUtils.normalizeJson(message);
             JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(normalizeJson);
             Map<String, String> map = new LinkedHashMap<>();
-            List<String> path = new ArrayList<>();
-            parse(jsonObject, map, path, 0);
+            parse(jsonObject, new ArrayList<>(), map);
             StringBuilder sb = new StringBuilder();
             map.forEach((k, v) -> {
                 sb.append("| ").append(k).append(" | ").append(v).append(" |").append("\n");
@@ -42,113 +37,54 @@ public class JsonToDataTableService {
 
     }
 
-    public void parse(JSONObject obj, Map<String, String> map, List<String> path, int iObj) {
-        Set<String> keys = obj.keySet();
-//        ListIterator<String> iterator = new ArrayListkeys).listIterator(keys.size());
+    private static void parse(JSONObject jsonObj, List<String> path, Map<String, String> map) {
+        Set<String> keys = jsonObj.keySet();
         for (String key : keys) {
-//        while (iterator.hasPrevious()) {
-//            final String key = iterator.previous();
-            Object value = obj.get(key);
+            Object value = jsonObj.get(key);
             if (value instanceof JSONObject) {
-                parseJsonObject((JSONObject) value, key, path, map, iObj);
+                path.add(key + ".");
+                parse((JSONObject) value, path, map);
+                path.remove(path.size() - 1);
             } else if (value instanceof JSONArray) {
-                parseJsonArray(value, key, path, map, iObj);
+                JSONArray jsonArray = (JSONArray) value;
+                path.add(key);
+                parseArr(jsonArray, path, map);
+                path.remove(path.size() - 1);
             } else {
-                correctPath(path);
-                String normalisePath = concatPath(path, key, iObj);
-                map.put(normalisePath, value.toString());
-            }
-
-        }
-    }
-
-    private void parseJsonObject(JSONObject value, String key, List<String> path, Map<String, String> map, int iObj) {
-        path.add(key);
-        iObj++;
-        if (path.size() > iObj) {
-            path.subList(iObj - 1, path.size() - 1).clear();
-        }
-        iObj = Math.min(iObj, path.size());
-        parse(value, map, path, iObj);
-    }
-
-    private void parseJsonArray(Object value, String key, List<String> path, Map<String, String> map, int iObj) {
-        JSONArray arr = (JSONArray) value;
-        for (Object arrValue : arr) {
-            if (arrValue instanceof JSONObject) {
-                String normalisePath = getPathFromKey(key, path);
-                path.add(normalisePath);
-                iObj++;
-                if (path.size() > iObj) {
-                    path.subList(iObj - 1, path.size() - 1).clear();
-                }
-                iObj = Math.min(iObj, path.size());
-                correctPath(path);
-                parse((JSONObject) arrValue, map, path, iObj);
-            } else if (arrValue instanceof String) {
-                String normalisePath = getPathFromKey(key, path);
-                path.add(normalisePath);
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < path.size() - 1; i++) {
-                    sb.append(path.get(i)).append(".");
-                }
-                sb.append(normalisePath);
-                map.put(sb.toString(), arrValue.toString());
-            } else if (arrValue instanceof JSONArray) {
-                parseJsonArray(value, key, path, map, iObj);
+                path.add(key);
+                map.put(concatPath(path), value.toString());
+                path.remove(path.size() - 1);
             }
         }
     }
 
-    private String getPathFromKey(String key, List<String> path) {
-        int index = 0;
-        if (!path.isEmpty()) {
-            correctPath(path);
-            Matcher matcher = ARRAY_PATTERN.matcher(path.get(path.size() - 1));
-            if (matcher.find()) {
-                String elementName = matcher.group(1);
-                index = elementName.equals(key)
-                        ? Integer.parseInt(matcher.group(2)) + 1
-                        : 0;
-            }
-        }
-        if (index > 0) path.remove(path.size() - 1);
-        return key + "[" + index + "]";
-    }
-
-    private void correctPath(List<String> path) {
-        if (path.size() > 1) {
-            for (int i = 0; i < path.size(); i++) {
-                for (int j = 0; j < path.size(); j++) {
-                    if (i != j) {
-                        String path1 = path.get(i);
-                        String path2 = path.get(j);
-                        Matcher matcher1 = ARRAY_PATTERN.matcher(path1);
-                        if (matcher1.find()) {
-                            path1 = matcher1.group(1);
-                            int index1 = Integer.parseInt(matcher1.group(2));
-                            Matcher matcher2 = ARRAY_PATTERN.matcher(path2);
-                            if (matcher2.find()) {
-                                path2 = matcher2.group(1);
-                                if (path1.equals(path2)) {
-                                    path.set(i, path1 + "[" + (index1 + 1) + "]");
-                                    path.subList(i + 1, path.size()).clear();
-                                }
-                            }
-                        }
-                    }
-                }
+    private static void parseArr(JSONArray jsonArr, List<String> path, Map<String, String> map) {
+        for (int i = 0; i < jsonArr.size(); i++) {
+            Object val = jsonArr.get(i);
+            if (val instanceof JSONObject) {
+                path.add("[" + i + "].");
+                parse((JSONObject) val, path, map);
+                path.remove(path.size() - 1);
+            } else if (val instanceof JSONArray) {
+                parseArr((JSONArray) jsonArr.get(i), path, map);
+            } else {
+                path.add("[" + i + "]");
+                map.put(concatPath(path), val.toString());
+                path.remove(path.size() - 1);
             }
         }
     }
 
-    private String concatPath(List<String> path, String key, int iObj) {
+    private static String concatPath(List<String> paths) {
         StringBuilder sb = new StringBuilder();
-        if (path.size() > iObj) {
-            path.subList(iObj, path.size()).clear();
+        for (int i = 0; i < paths.size() - 1; i++) {
+            sb.append(paths.get(i));
         }
-        path.forEach(i -> sb.append(i).append("."));
-        sb.append(key);
+        String last = paths.get(paths.size() - 1);
+        if (last.endsWith(".")) {
+            last = last.substring(0, last.length() - 1);
+        }
+        sb.append(last);
         return sb.toString();
     }
 }
