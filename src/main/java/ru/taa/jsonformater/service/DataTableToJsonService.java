@@ -1,15 +1,13 @@
 package ru.taa.jsonformater.service;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.PathNotFoundException;
-import com.jayway.jsonpath.ReadContext;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 import org.springframework.stereotype.Service;
 import ru.taa.jsonformater.dto.JsonRs;
 
-
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -20,12 +18,116 @@ import java.util.regex.Pattern;
 @Slf4j
 public class DataTableToJsonService {
 
-    private static final Pattern ARRAY_PATTERN = Pattern.compile("(.*)(\\[([0-9]+)])");
-    private static final String PATH_SEPARATOR = ".";
+    private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
 
-    private static final String WRONG_LAST_INDEX_ERROR = "Неверно задан эелемент массива. Текущий порядковый номер: `%d`, ожидаемый: `%d`";
-    private static final String PATH_BEGIN = "$";
 
+    private static final String RES = "{\n" +
+            "    \"persons\": [\n" +
+            "        {\n" +
+            "            \"bio\": {\n" +
+            "                \"birthDay\": \"01.02.2222\"\n" +
+            "            }\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"name\": \"Ivan\",\n" +
+            "            \"lastName\": null,\n" +
+            "            \"arr\": [\n" +
+            "                1,\n" +
+            "                2,\n" +
+            "                3\n" +
+            "            ]\n" +
+            "        },\n" +
+            "        {\n" +
+            "            \"status\": true\n" +
+            "        }\n" +
+            "    ]\n" +
+            "}";
+    private static final String RES2 = "{}";
+
+    public static void main(String[] args) {
+        Map<String, String> map = new LinkedHashMap<>();
+//        map.put("persons[0].bio.birthDay", "1111111");
+//        map.put("persons[0]", "22222");
+//        map.put("persons[3].3333.4444", "5555");
+        map.put("name[0].firs", "Ivan");
+        map.put("name[0].last", "Petrov");
+        map.put("jjjj[0]", "");
+        final String bind = bind(RES2, map);
+        final String s = bind.replaceAll("\\[\"\"]", "[]");
+        System.out.println(s);
+    }
+
+    @SneakyThrows
+    private static String bind(String content, Map<String, String> params) {
+        JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(content);
+
+        params.forEach((key, val) -> {
+            String[] keys = key.split("\\.");
+            int idx = 0;
+            parseObj(jsonObject, keys, idx, val);
+        });
+        return jsonObject.toJSONString();
+    }
+
+    private static void parseObj(JSONObject jsonObj, String[] keys, int idx, String val) {
+        String key = keys[idx];
+
+        Matcher matcher = ARRAY_PATTERN.matcher(key);
+        if (matcher.find()) {
+            key = matcher.group(1);
+            int i = Integer.parseInt(matcher.group(2));
+            JSONArray array = (JSONArray) jsonObj.get(key);
+            if (Objects.isNull(array)) {
+                jsonObj.put(key, new JSONArray());
+                array = (JSONArray) jsonObj.get(key);
+            }
+            if (setValue(keys, idx, array, val, i)) {
+                return;
+            }
+            Object value = getArrValue(array, i);
+            parseObj((JSONObject) value, keys, ++idx, val);
+        } else {
+            if (keys.length - 1 == idx) {
+                jsonObj.put(key, val);
+                return;
+            }
+            Object value = getObjValue(jsonObj, key, val);
+            parseObj((JSONObject) value, keys, ++idx, val);
+        }
+    }
+
+    private static Object getObjValue(JSONObject jsonObj, String key, String val) {
+        Object object = jsonObj.get(key);
+        if (Objects.isNull(object)) {
+            jsonObj.put(key, new JSONObject());
+            object = jsonObj.get(key);
+        }
+        return object;
+    }
+
+    private static Object getArrValue(JSONArray array, int i) {
+        Object value;
+        try {
+            value = array.get(i);
+        } catch (IndexOutOfBoundsException e) {
+            array.add(new JSONObject());
+            value = array.get(i);
+        }
+        return value;
+    }
+
+    private static boolean setValue(String[] keys, int idx, JSONArray array, String val, int i) {
+        try {
+            if (keys.length - 1 == idx) {
+                array.set(i, val);
+                return true;
+            }
+        } catch (IndexOutOfBoundsException e) {
+            array.add(i, val);
+            return true;
+        }
+        return false;
+    }
 
     public JsonRs format(String table) {
         try {
@@ -46,100 +148,5 @@ public class DataTableToJsonService {
             }
         }
         return tables;
-    }
-
-    private String bind(String content, Map<String, String> params) {
-        DocumentContext ctx = JsonPath.parse(content);
-        params.forEach((k, v) -> modify(ctx, k, v));
-        return ctx.jsonString();
-    }
-
-    /**
-     * Установка нового значения в существующем пути или создание нового пути в json файле
-     *
-     * @param ctx   контекст json файла
-     * @param path  новый путь
-     * @param value значение для установки
-     */
-    private void modify(DocumentContext ctx, String path, String value) {
-        String rootPath = PATH_BEGIN + PATH_SEPARATOR + path;
-        if (hasPath(ctx, rootPath)) {
-            deleteOrSet(ctx, path, value, rootPath);
-            return;
-        } else if (Objects.isNull(value)) {
-            log.debug("New parameter value is null and path not found={}", path);
-            return;
-        }
-
-        String[] splitPath = rootPath.split("\\.");
-        StringBuilder newPath = new StringBuilder(PATH_BEGIN);
-
-        for (int i = 1; i < splitPath.length; i++) {
-            String currPathItem = splitPath[i];
-            if (hasPath(ctx, newPath + PATH_SEPARATOR + currPathItem)) { // пропуск существующих элементов пути
-                newPath.append(PATH_SEPARATOR).append(currPathItem);
-                continue;
-            }
-            doModify(ctx, newPath, value, currPathItem, i == splitPath.length - 1);
-        }
-    }
-
-    private void doModify(DocumentContext ctx, StringBuilder newPath, String value,
-                          String currPath, boolean isLastItemInPath) {
-        Matcher matcher = ARRAY_PATTERN.matcher(currPath);
-        if (matcher.matches()) { //если текущий элемент пути является массивом
-            String nextPath = newPath + PATH_SEPARATOR + matcher.group(1);
-            if (!hasPath(ctx, nextPath)) { //проверим, что существует сам массив и если нет - создадим
-                log.trace("Root tag of array isn't found, create path: {}.{}", newPath, matcher.group(1));
-                ctx.put(newPath.toString(), matcher.group(1), new ArrayList<>());
-            }
-
-            //если текущий элемент пути последний, то это простой массив - добавляем элемент
-            if (isLastItemInPath) {
-                log.trace("Last element of path `{}`: add array element={}", nextPath, value);
-                ctx.add(nextPath, value);
-            } else { //иначе это массив объектов - добавляем в массив новый объект
-                log.trace("Add object to array by path `{}`", nextPath);
-                ctx.add(nextPath, new LinkedHashMap<>());
-            }
-            int lastIndex = ctx.read(nextPath + ".length()", Integer.class) - 1;
-            int expectedIndex = Integer.parseInt(matcher.group(3));
-
-            newPath.append(PATH_SEPARATOR).append(currPath);
-        } else if (isLastItemInPath) { // текущий элемент пути последний - добавим или заменим значение поля
-            log.trace("Create or update path `{}` by value={}", newPath, value);
-            ctx.put(newPath.toString(), currPath, value);
-        } else { // если не последний, то это новый объект - создадим мапу
-            log.trace("Create or update path `{}` by empty object", newPath);
-            ctx.put(newPath.toString(), currPath, new LinkedHashMap<>());
-            newPath.append(PATH_SEPARATOR).append(currPath);
-        }
-    }
-
-    private void deleteOrSet(DocumentContext ctx, String path, String value, String rootPath) {
-        if (Objects.isNull(value)) {
-            log.debug("New parameter value is null, remove path={}", path);
-            ctx.delete(rootPath);
-        } else {
-            log.trace("Change existed json parameter for path={}: val={}", path, value);
-            ctx.set(rootPath, value);
-        }
-    }
-
-    /**
-     * Проверка существования значения по указанному пути в json
-     *
-     * @param ctx  контекст json файла для поиска пути
-     * @param path путь в json файле
-     * @return false - не существует значения по указанному пути, true - значение по указанному пути установлено
-     */
-    private boolean hasPath(ReadContext ctx, String path) {
-        try {
-            ctx.read(path);
-        } catch (PathNotFoundException e) {
-            log.trace("Path does not exists: {}", path);
-            return false;
-        }
-        return true;
     }
 }

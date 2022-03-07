@@ -29,31 +29,31 @@ public class FormatUtils {
 //        }
 //        return message;
 //    }
-    private static final String RES = "{\n" +
-            "    \"persons\": [\n" +
-            "        {\n" +
-            "            \"bio\": {\n" +
-            "                \"birthDay\": \"01.02.2222\"\n" +
-            "            }\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"name\": \"Ivan\",\n" +
-            "            \"lastName\": null,\n" +
-            "            \"arr\": [\n" +
-            "                1,\n" +
-            "                2,\n" +
-            "                3\n" +
-            "            ]\n" +
-            "        },\n" +
-            "        {\n" +
-            "            \"status\": true\n" +
-            "        }\n" +
-            "    ]\n" +
-            "}";
+//    private static final String RES = "{\n" +
+//            "    \"persons\": [\n" +
+//            "        {\n" +
+//            "            \"bio\": {\n" +
+//            "                \"birthDay\": \"01.02.2222\"\n" +
+//            "            }\n" +
+//            "        },\n" +
+//            "        {\n" +
+//            "            \"name\": \"Ivan\",\n" +
+//            "            \"lastName\": null,\n" +
+//            "            \"arr\": [\n" +
+//            "                1,\n" +
+//            "                2,\n" +
+//            "                3\n" +
+//            "            ]\n" +
+//            "        },\n" +
+//            "        {\n" +
+//            "            \"status\": true\n" +
+//            "        }\n" +
+//            "    ]\n" +
+//            "}";
 
-    public static void main(String[] args) {
-        System.out.println(normalizeJson(RES));
-    }
+//    public static void main(String[] args) {
+//        System.out.println(normalizeJson(RES));
+//    }
 
 
     @SneakyThrows

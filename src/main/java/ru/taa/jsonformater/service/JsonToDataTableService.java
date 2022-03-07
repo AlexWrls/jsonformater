@@ -13,7 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 
 @Service
@@ -25,7 +24,7 @@ public class JsonToDataTableService {
             String normalizeJson = FormatUtils.normalizeJson(message);
             JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(normalizeJson);
             Map<String, String> map = new LinkedHashMap<>();
-            parse(jsonObject, new ArrayList<>(), map);
+            parseObj(jsonObject, new ArrayList<>(), map);
             StringBuilder sb = new StringBuilder();
             map.forEach((k, v) -> {
                 sb.append("| ").append(k).append(" | ").append(v).append(" |").append("\n");
@@ -37,13 +36,13 @@ public class JsonToDataTableService {
 
     }
 
-    private static void parse(JSONObject jsonObj, List<String> path, Map<String, String> map) {
+    private static void parseObj(JSONObject jsonObj, List<String> path, Map<String, String> map) {
         Set<String> keys = jsonObj.keySet();
         for (String key : keys) {
             Object value = jsonObj.get(key);
             if (value instanceof JSONObject) {
                 path.add(key + ".");
-                parse((JSONObject) value, path, map);
+                parseObj((JSONObject) value, path, map);
                 path.remove(path.size() - 1);
             } else if (value instanceof JSONArray) {
                 JSONArray jsonArray = (JSONArray) value;
@@ -63,7 +62,7 @@ public class JsonToDataTableService {
             Object val = jsonArr.get(i);
             if (val instanceof JSONObject) {
                 path.add("[" + i + "].");
-                parse((JSONObject) val, path, map);
+                parseObj((JSONObject) val, path, map);
                 path.remove(path.size() - 1);
             } else if (val instanceof JSONArray) {
                 parseArr((JSONArray) jsonArr.get(i), path, map);
