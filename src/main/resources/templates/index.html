@@ -10,11 +10,18 @@
     <link type="text/css" rel="stylesheet" th:href="@{/css/bootstrap.min.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/codemirror.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/abbott.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/darcula.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/idea.css}">
+
     <!-- JS -->
-    <script src="js/bootstrap.min.js" th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <script src="js/bootstrap.min.js" th:src="@{/js/codemirror.js}"></script>
-    <script src="js/bootstrap.min.js" th:src="@{/js/jquery.min.js}"></script>
-    <script src="js/bootstrap.min.js" th:src="@{/js/perl.js}"></script>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/codemirror.js}"></script>
+    <script th:src="@{/js/jquery.min.js}"></script>
+    <script th:src="@{/js/perl.js}"></script>
+
+    <script th:src="@{/js/mode.js}"></script>
+
+
     <style>
         body {
             background-color: #95bf95;
@@ -31,20 +38,23 @@
 
         .container {
             /*margin-top: 10px;*/
+            width: 100%;
         }
-        .footer{
+
+        .footer {
             color: darkgrey;
             background-color: rgba(33, 37, 41, 0.78);
             text-align: center;
             font-style: oblique;
             margin-top: 10px;
         }
-        .CodeMirror-scroll{
+
+        .CodeMirror-scroll {
         }
     </style>
 </head>
 <body>
-<div class="container">
+<div class="container-fluid">
     <h6 class="footer">Форматирование json в таблицу данных</h6>
     <div class="row">
         <div class="col">
@@ -102,19 +112,38 @@
     let json
     window.onload = function (event) {
         table = CodeMirror.fromTextArea(document.getElementById('table'), {
-            lineNumbers: true,
+            lineNumbers: true, // Нумеровать каждую строчку.
+            mode: 'application/xml',
+            // theme: "darcula",   // Установить тему
+
         });
 
         json = CodeMirror.fromTextArea(document.getElementById('json'), {
             lineNumbers: true,
+            // theme: "darcula",   // Установить тему
+            theme: "idea",   // Установить тему
         });
-        table.setSize(530, 600);
-        json.setSize(530, 600);
+
+        let  them = 'idea'
+        const windowInnerWidth = document.documentElement.clientWidth
+        const windowInnerHeight = document.documentElement.clientHeight
+
+        table.setSize(((windowInnerWidth / 2) - 150), (windowInnerHeight - 200));
+        json.setSize(((windowInnerWidth / 2) - 150), (windowInnerHeight - 200));
         let elJson = document.getElementsByClassName('CodeMirror cm-s-default')[0];
         elJson.style.fontSize = '90%';
         let elTable = document.getElementsByClassName('CodeMirror cm-s-default')[1];
         elTable.style.fontSize = '90%';
     }
+
+    window.addEventListener('resize', function () {
+        const windowInnerWidth = document.documentElement.clientWidth
+        const windowInnerHeight = document.documentElement.clientHeight
+
+        table.setSize(((windowInnerWidth / 2) - 150), (windowInnerHeight - 200));
+        json.setSize(((windowInnerWidth / 2) - 150), (windowInnerHeight - 200));
+
+    });
 
     function copy_json_value() {
         let text = json.getValue();
