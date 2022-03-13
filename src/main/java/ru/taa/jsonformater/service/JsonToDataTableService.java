@@ -18,6 +18,8 @@ import java.util.Set;
 public class JsonToDataTableService {
 
     private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат JSON";
+    private static final String EMPTY_ARRAY = "[]";
+    private static final String EMPTY_OBJECT = "{}";
 
     public ObjectRs bind(String jsonString) {
         try {
@@ -42,12 +44,23 @@ public class JsonToDataTableService {
         for (String key : keys) {
             Object value = jsonObj.get(key);
             if (value instanceof JSONObject) {
+                JSONObject obj = (JSONObject) value;
                 path.add(key + ".");
-                parseObj((JSONObject) value, path, map);
+                if (obj.size() == 0) {
+                    map.put(concatPath(path), EMPTY_OBJECT);
+                    path.remove(path.size() - 1);
+                    continue;
+                }
+                parseObj(obj, path, map);
                 path.remove(path.size() - 1);
             } else if (value instanceof JSONArray) {
                 JSONArray jsonArray = (JSONArray) value;
                 path.add(key);
+                if (jsonArray.size() == 0) {
+                    map.put(concatPath(path), EMPTY_ARRAY);
+                    path.remove(path.size() - 1);
+                    continue;
+                }
                 parseArr(jsonArray, path, map);
                 path.remove(path.size() - 1);
             } else {

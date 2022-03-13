@@ -22,6 +22,8 @@ public class DataTableToJsonService {
     private static final String ROOT = "{}";
     private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат DATA_TABLE";
     private static final String EXCEPT_ARRAY_IDX = "Нарушен порядок добавления в массив %s, ожидаемый индекс:%d заданный индекс:%d";
+    private static final String EMPTY_ARRAY = "[]";
+    private static final String EMPTY_OBJECT = "{}";
 
     public ObjectRs format(String table) {
         try {
@@ -32,7 +34,7 @@ public class DataTableToJsonService {
         }
     }
 
-    private  String bind(String content, Map<String, String> params) throws ParseException {
+    private String bind(String content, Map<String, String> params) throws ParseException {
         JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(content);
         params.forEach((key, val) -> {
             String[] keys = key.split("\\.");
@@ -42,7 +44,7 @@ public class DataTableToJsonService {
         return jsonObject.toJSONString();
     }
 
-    private  void parseObj(JSONObject jsonObj, String[] keys, int idx, String val) {
+    private void parseObj(JSONObject jsonObj, String[] keys, int idx, String val) {
         String key = keys[idx];
         Matcher matcher = ARRAY_PATTERN.matcher(key);
         if (matcher.find()) {
@@ -61,7 +63,7 @@ public class DataTableToJsonService {
             parseObj((JSONObject) value, keys, ++idx, val);
         } else {
             if (keys.length - 1 == idx) {
-                jsonObj.put(key, val);
+                setObjectValue(jsonObj, key, val);
                 return;
             }
             Object value = getObjValue(jsonObj, key, val);
@@ -69,7 +71,7 @@ public class DataTableToJsonService {
         }
     }
 
-    private  Object getObjValue(JSONObject jsonObj, String key, String val) {
+    private Object getObjValue(JSONObject jsonObj, String key, String val) {
         Object object = jsonObj.get(key);
         if (Objects.isNull(object)) {
             jsonObj.put(key, new JSONObject());
@@ -78,7 +80,7 @@ public class DataTableToJsonService {
         return object;
     }
 
-    private  Object getArrValue(JSONArray array, int i) {
+    private Object getArrValue(JSONArray array, int i) {
         if (i < array.size()) {
             return array.get(i);
         } else {
@@ -91,7 +93,17 @@ public class DataTableToJsonService {
         }
     }
 
-    private  void setValue(JSONArray array, String val, int i) {
+    private void setObjectValue(JSONObject jsonObj, String key, String val) {
+        if (EMPTY_OBJECT.equals(val)) {
+            jsonObj.put(key, new JSONObject());
+        } else if (EMPTY_ARRAY.equals(val)) {
+            jsonObj.put(key, new JSONArray());
+        } else {
+            jsonObj.put(key, val);
+        }
+    }
+
+    private void setValue(JSONArray array, String val, int i) {
         if (i < array.size()) {
             array.set(i, val);
         } else if (i == array.size()) {
