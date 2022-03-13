@@ -5,6 +5,6 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class JsonRs {
-    private final String jsonData;
+public class ObjectRs {
+    private final String txt;
 }

@@ -8,6 +8,8 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import ru.taa.jsonformater.dto.ObjectRs;
+import ru.taa.jsonformater.utils.FormatUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -28,29 +30,44 @@ import java.util.regex.Pattern;
 
 @Slf4j
 @Service
-public class DataTableToXmlService  {
+public class DataTableToXmlService {
 
     private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
+    private static final String ATTRIBUTE = "_";
+    private static final String ROOT = "<root></root>";
+    private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат DATA_TABLE";
 
-
-    public String format(String content, Map<String, String> params) {
+    public ObjectRs bind(String table) {
         try {
-            Document doc = stringToDom(content);
+            String resultXml = format(FormatUtils.prepareData(table));
+            return ObjectRs.builder().txt(resultXml).build();
+        } catch (Exception e) {
+            return ObjectRs.builder().txt(EXCEPT).build();
+        }
+    }
+
+    private String format(Map<String, String> params) {
+        try {
+            Document doc = stringToDom();
             AtomicReference<Node> node = new AtomicReference<>(doc.getFirstChild());
             params.forEach((k, v) -> {
                 String[] paths = k.split("\\.");
                 for (int i = 0; i < paths.length; i++) {
-                    Matcher matcher = ARRAY_PATTERN.matcher(paths[i]);
-                    if (!matcher.find()) {
-                        paths[i] += "[0]";
-                        matcher = ARRAY_PATTERN.matcher(paths[i]);
-                        matcher.find();
-                    }
                     // Получить название и индекс нужного элемента
-                    String elementName = matcher.group(1);
-                    int indexElement = Integer.parseInt(matcher.group(3));
-
+                    String elementName = paths[i];
+                    int indexElement = 0;
+                    Matcher matcher = ARRAY_PATTERN.matcher(elementName);
+                    if (matcher.find()) {
+                        elementName = matcher.group(1);
+                        indexElement = Integer.parseInt(matcher.group(2));
+                    }
                     Element element = (Element) node.get();
+
+                    if (elementName.startsWith(ATTRIBUTE)) {
+                        element.setAttribute(elementName.substring(1), v);
+                        node.set(doc.getFirstChild());
+                        continue;
+                    }
                     // Получаем элемент по названию и индексу
                     Node item = element.getElementsByTagName(elementName).item(indexElement);
                     // Если не найден то создадим
@@ -72,22 +89,22 @@ public class DataTableToXmlService  {
             });
             return domToString(doc);
         } catch (Exception e) {
-            log.error("Error parsing xml", e);
+            log.error("Ошибка разбора параметров:\n" + params.toString());
         }
-        return content;
+        return DataTableToXmlService.ROOT;
     }
 
     //Конвертирование текста в DOM элемент
-    private static Document stringToDom(String xmlSource) {
+    private  Document stringToDom() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            StringReader reader = new StringReader(xmlSource);
+            StringReader reader = new StringReader(DataTableToXmlService.ROOT);
             InputSource source = new InputSource(reader);
             return builder.parse(source);
         } catch (ParserConfigurationException | IOException | SAXException e) {
-            log.error("Error parsing String to Document", e);
-            throw new RuntimeException("Error parsing String to Document", e);
+            log.error("Ошибка конвертации строки в Document");
+            throw new RuntimeException("Error parsing String to Document");
         }
     }
 
@@ -103,8 +120,8 @@ public class DataTableToXmlService  {
             transformer.transform(new DOMSource(doc), new StreamResult(sw));
             return sw.toString();
         } catch (Exception e) {
-            log.error("Error converting Document to String", e);
-            throw new RuntimeException("Error converting Document to String", e);
+            log.error("Ошибка конвертицм Document в строку");
+            throw new RuntimeException("Error converting Document to String");
         }
     }
 }

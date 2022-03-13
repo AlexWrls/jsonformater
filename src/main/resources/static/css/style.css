@@ -1,0 +1,28 @@
+body {
+    background-color: #3b4e3b;
+}
+
+.card-header {
+    background-color: rgba(33, 37, 41, 0.78);
+}
+
+.card-body {
+    background-color: #ebebeb;
+}
+
+.container {
+    /*margin-top: 10px;*/
+    width: 100%;
+}
+
+.footer {
+    color: darkgrey;
+    background-color: rgba(33, 37, 41, 0.78);
+    text-align: center;
+    font-style: oblique;
+    margin-top: 10px;
+}
+
+.cm-s-darcula span.cm-string {
+    color: #91cd6e;
+}

@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import ru.taa.jsonformater.dto.JsonRq;
-import ru.taa.jsonformater.dto.JsonRs;
+import ru.taa.jsonformater.dto.ObjectRq;
+import ru.taa.jsonformater.dto.ObjectRs;
 import ru.taa.jsonformater.service.DataTableToJsonService;
 import ru.taa.jsonformater.service.JsonToDataTableService;
 
@@ -28,14 +28,14 @@ public class JsonFormatController {
     }
 
     @PostMapping("/json_to_data_table")
-    public ResponseEntity<?> jsonToDataTable(@RequestBody JsonRq jsonObject) {
-        JsonRs format = jsonToDataTableService.format(jsonObject.getJsonData());
+    public ResponseEntity<?> jsonToDataTable(@RequestBody ObjectRq jsonObject) {
+        ObjectRs format = jsonToDataTableService.bind(jsonObject.getTxt());
         return ResponseEntity.ok(format);
     }
 
     @PostMapping("/data_table_to_json")
-    public ResponseEntity<?> dataTableToJson(@RequestBody JsonRq jsonObject) {
-        JsonRs format = tableToJsonService.format(jsonObject.getJsonData());
+    public ResponseEntity<?> dataTableToJson(@RequestBody ObjectRq jsonObject) {
+        ObjectRs format = tableToJsonService.format(jsonObject.getTxt());
         return ResponseEntity.ok(format);
     }
 }

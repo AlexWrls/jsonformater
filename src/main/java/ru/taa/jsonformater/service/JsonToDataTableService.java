@@ -3,9 +3,8 @@ package ru.taa.jsonformater.service;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
-import org.json.simple.parser.ParseException;
 import org.springframework.stereotype.Service;
-import ru.taa.jsonformater.dto.JsonRs;
+import ru.taa.jsonformater.dto.ObjectRs;
 import ru.taa.jsonformater.utils.FormatUtils;
 
 import java.util.ArrayList;
@@ -18,10 +17,11 @@ import java.util.Set;
 @Service
 public class JsonToDataTableService {
 
+    private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат JSON";
 
-    public JsonRs format(String message) {
+    public ObjectRs bind(String jsonString) {
         try {
-            String normalizeJson = FormatUtils.normalizeJson(message);
+            String normalizeJson = FormatUtils.normalizeJson(jsonString);
             JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(normalizeJson);
             Map<String, String> map = new LinkedHashMap<>();
             parseObj(jsonObject, new ArrayList<>(), map);
@@ -29,9 +29,10 @@ public class JsonToDataTableService {
             map.forEach((k, v) -> {
                 sb.append("| ").append(k).append(" | ").append(v).append(" |").append("\n");
             });
-            return JsonRs.builder().jsonData(sb.toString()).build();
-        } catch (ParseException e) {
-            return JsonRs.builder().jsonData("Ошибка разбора, проверьте данные").build();
+
+            return ObjectRs.builder().txt(sb.toString()).build();
+        } catch (Exception e) {
+            return ObjectRs.builder().txt(EXCEPT).build();
         }
 
     }
