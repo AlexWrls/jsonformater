@@ -14,6 +14,9 @@ import java.util.Map;
 import java.util.Set;
 
 
+/**
+ * Сервис конвертирования Json в Data table
+ */
 @Service
 public class JsonToDataTableService {
 
@@ -21,7 +24,7 @@ public class JsonToDataTableService {
     private static final String EMPTY_ARRAY = "[]";
     private static final String EMPTY_OBJECT = "{}";
 
-    public ObjectRs bind(String jsonString) {
+    public ObjectRs convert(String jsonString) {
         try {
             String normalizeJson = FormatUtils.normalizeJson(jsonString);
             JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(normalizeJson);
@@ -100,4 +103,5 @@ public class JsonToDataTableService {
         sb.append(last);
         return sb.toString();
     }
+
 }

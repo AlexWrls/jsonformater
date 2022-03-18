@@ -1,0 +1,53 @@
+<div xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="json_fragment()">
+
+    <div class="row">
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b style="color: #198754">Json</b>
+                    <span>
+                    <button class="btn-sm btn-secondary" id="btn-tab-print" onclick="tab_print()">TabPrint</button>
+                    <button class="btn-sm btn-secondary" onclick="copy_json_value()">Copy</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,+1)">A+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,-1)">A-</button>
+                    <button class="btn-sm btn-secondary" id="btn-json-max"
+                            onclick="change_size('+')"><b>[<->]</b></button>
+                    <button class="btn-sm btn-secondary" style="display: none" id="btn-json-min"
+                            onclick="change_size()"><b>->[]<-</b></button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="json" id="json-label" class="form-label">Json</label>
+                    <textarea class="form-control" id="json" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-1">
+            <button class="btn-sm btn-primary mt-5" style="width: 100%" id="btn-json" onclick="json_to_table()">
+                <b>table-></b></button>
+            <button class="btn-sm btn-primary mt-2 mb-5" style="width: 100%" id="btn-table" onclick="table_to_json()"><b><-json</b>
+            </button>
+        </div>
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b style="color: #198754">Table</b>
+                    <span>
+                     <button class="btn-sm btn-secondary" onclick="copy_table_value()">Copy</button>
+                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,+1)">A+</button>
+                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,-1)">A-</button>
+                     <button class="btn-sm btn-secondary" id="btn-table-max"
+                             onclick="change_size('+')"><b>[<->]</b></button>
+                     <button class="btn-sm btn-secondary" style="display: none" id="btn-table-min"
+                             onclick="change_size()"><b>->[]<-</b></button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="table" id="table-label" class="form-label">Table</label>
+                    <textarea class="form-control" id="table" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

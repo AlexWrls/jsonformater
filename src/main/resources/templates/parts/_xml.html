@@ -1,0 +1,55 @@
+<div xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="xml_fragment()">
+
+    <div class="row">
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b style="color: #198754">XML</b>
+                    <span>
+                  <button class="btn-sm btn-secondary" id="btn-tab-print-xml" onclick="tab_print_xml()">TabPrint</button>
+                    <button class="btn-sm btn-secondary" onclick="copy_xml_value()">Copy</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(2,+1)">A+</button>
+                    <button class="btn-sm btn-secondary" onclick="change_text_size(2,-1)">A-</button>
+                    <button class="btn-sm btn-secondary" id="btn-xml-max"
+                            onclick="change_size('+')"><b>[<->]</b></button>
+                    <button class="btn-sm btn-secondary" style="display: none" id="btn-xml-min"
+                            onclick="change_size()"><b>->[]<-</b></button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="xml" id="xml-label" class="form-label">Xml</label>
+                    <textarea class="form-control" id="xml" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="col-1">
+            <button class="btn-sm btn-primary mt-5" style="width: 100%" id="btn-xml" onclick="xml_to_table()">
+                <b>table-></b>
+            </button>
+            <button class="btn-sm btn-primary mt-2 mb-5" style="width: 100%" id="btn-xml-table" onclick="table_to_xml()">
+                <b><-xml</b>
+            </button>
+        </div>
+        <div class="col">
+            <div class="card text-dark bg-light">
+                <div class="card-header" style="justify-content: space-between;display: flex">
+                    <b style="color: #198754">Table</b>
+                    <span>
+                     <button class="btn-sm btn-secondary" onclick="copy_table_xml_value()">Copy</button>
+                     <button class="btn-sm btn-secondary" onclick="change_text_size(3,+1)">A+</button>
+                     <button class="btn-sm btn-secondary" onclick="change_text_size(3,-1)">A-</button>
+                     <button class="btn-sm btn-secondary" id="btn-table-xml-max"
+                             onclick="change_size('+')"><b>[<->]</b></button>
+                     <button class="btn-sm btn-secondary" style="display: none" id="btn-table-xml-min"
+                             onclick="change_size()"><b>->[]<-</b></button>
+                    </span>
+                </div>
+                <div class="card-body">
+                    <label for="table-xml" id="table-xml-label" class="form-label">Table</label>
+                    <textarea class="form-control" id="table-xml" rows="25"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

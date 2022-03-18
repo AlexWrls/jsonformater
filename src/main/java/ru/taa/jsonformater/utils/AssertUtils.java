@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-
-
 @UtilityClass
 public class AssertUtils {
 
@@ -27,7 +25,7 @@ public class AssertUtils {
             JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(normalizeJson);
             param.forEach((k, v) -> {
                 String[] split = k.split("\\.");
-                jsonParseToParam(jsonObject, split, v.replaceAll("\\s|\\n", ""), 0);
+                jsonParseToParam(jsonObject, split, v, 0);
             });
         } catch (ParseException e) {
             throw new RuntimeException("Ошибка разбора json.\n");
@@ -54,7 +52,7 @@ public class AssertUtils {
                 value = String.valueOf(arr.get(arrIndex));
             }
             String messageEx = String.format("\nАктуальный:<%s>  Ожидаемый:<%s>\nСтрока:\n%s\n", value, chekValue, getTextException(paths, chekValue));
-            Assert.assertEquals(messageEx, value, chekValue);
+            Assert.assertEquals(messageEx, value, chekValue.trim());
             return;
         }
         try {

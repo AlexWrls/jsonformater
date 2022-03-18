@@ -13,68 +13,39 @@
     <link type="text/css" rel="stylesheet" th:href="@{/css/darcula.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/idea.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/style.css}">
-
     <!-- JS -->
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/codemirror.js}"></script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/perl.js}"></script>
-    <script th:src="@{/js/mode.js}"></script>
-    <script th:src="@{/js/main.js}"></script>
+    <script th:src="@{/js/xml.mode.js}"></script>
+
 </head>
 <body>
 <div class="container-fluid">
-    <h6 class="footer">Форматирование json в таблицу данных</h6>
-    <div class="row">
-        <div class="col">
-            <div class="card text-dark bg-light">
-                <div class="card-header" style="justify-content: space-between;display: flex">
-                    <b>Json</b>
-                    <span>
-                    <button class="btn-sm btn-secondary" id="btn-tab-print" onclick="tab_print()">TabPrint</button>
-                    <button class="btn-sm btn-secondary" onclick="copy_json_value()">Copy</button>
-                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,+1)">A+</button>
-                    <button class="btn-sm btn-secondary" onclick="change_text_size(0,-1)">A-</button>
-                    <button class="btn-sm btn-secondary" id="btn-json-max"
-                            onclick="change_size('+')"><b>[<->]</b></button>
-                    <button class="btn-sm btn-secondary" style="display: none" id="btn-json-min"
-                            onclick="change_size()"><b>->[]<-</b></button>
-                    </span>
-                </div>
-                <div class="card-body">
-                    <label for="json" id="json-label" class="form-label">Json</label>
-                    <textarea class="form-control" id="json" rows="25"></textarea>
-                </div>
-            </div>
-        </div>
-        <div class="col-1">
-            <button class="btn-sm btn-dark mt-5" style="width: 100%" id="btn-json" onclick="json_to_table()">
-                <b>table-></b></button>
-            <button class="btn-sm btn-dark mt-2 mb-5" style="width: 100%" id="btn-table" onclick="table_to_json()"><b><-json</b>
-            </button>
-        </div>
-        <div class="col">
-            <div class="card text-dark bg-light">
-                <div class="card-header" style="justify-content: space-between;display: flex">
-                    <b>Table</b>
-                    <span>
-                     <button class="btn-sm btn-secondary" onclick="copy_table_value()">Copy</button>
-                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,+1)">A+</button>
-                     <button class="btn-sm btn-secondary" onclick="change_text_size(1,-1)">A-</button>
-                     <button class="btn-sm btn-secondary" id="btn-table-max"
-                             onclick="change_size('+')"><b>[<->]</b></button>
-                     <button class="btn-sm btn-secondary" style="display: none" id="btn-table-min"
-                             onclick="change_size()"><b>->[]<-</b></button>
-                    </span>
-                </div>
-                <div class="card-body">
-                    <label for="table" id="table-label" class="form-label">Table</label>
-                    <textarea class="form-control" id="table" rows="25"></textarea>
-                </div>
-            </div>
-        </div>
+    <!--    <h6 class="footer">Форматирование в таблицу данных</h6>-->
+    <div class="navbar-dark">
+        <button class="btn-secondary tablink" onclick="openPage('josnFormat', this, )" id="jsonOpen">Json Format
+        </button>
+        <button class="btn-secondary tablink" onclick="openPage('xmlFormat', this, )" id="xmlOpen">Xml Format</button>
     </div>
-    <h6 class="footer">Version-1.0</h6>
+
+    <div id="josnFormat" class="tabcontent">
+        <div th:replace="parts/_json :: json_fragment()"/>
+    </div>
+
+    <div id="xmlFormat" class="tabcontent">
+        <div th:replace="parts/_xml :: xml_fragment()"/>
+    </div>
+    <h6 class="footer">Version-1.2.1</h6>
 </div>
+
+<script th:src="@{/js/main.js}"></script>
+<script>
+    setTimeout(function () {
+        document.getElementById('jsonOpen').click();
+    }, 100);
+</script>
+
 </body>
 </html>

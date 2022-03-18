@@ -1,5 +1,6 @@
 body {
-    background-color: #3b4e3b;
+    background-color: #2c2f2c;
+    /*background-image: url('./img/fon.jpeg');*/
 }
 
 .card-header {
@@ -12,7 +13,6 @@ body {
 
 .container {
     /*margin-top: 10px;*/
-    width: 100%;
 }
 
 .footer {
@@ -23,6 +23,32 @@ body {
     margin-top: 10px;
 }
 
-.cm-s-darcula span.cm-string {
-    color: #91cd6e;
+/* Стиль вкладкок ссылок */
+.tablink {
+    background-color: rgba(87, 86, 86, 0.66);
+    color: white;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 5px 5px;
+    font-size: 17px;
+    width: 200px;
+}
+
+.tablink:hover {
+    background-color: #777;
+}
+
+/* Стиль содержимого вкладки (и добавить высоту: 100% для полного содержимого страницы) */
+.tabcontent {
+    color: white;
+    height: 100%;
+}
+.cm-s-default .cm-string {
+    color: #170;
+}
+
+.cm-s-default .cm-meta {
+    color: #170;
 }

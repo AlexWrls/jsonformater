@@ -28,19 +28,21 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@Slf4j
+/**
+ * Сервис конвертирования Data table в Json
+ */
 @Service
+@Slf4j
 public class DataTableToXmlService {
-
     private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
-    private static final String ATTRIBUTE = "_";
+    private static final String ATTRIBUTE = "@";
     private static final String ROOT = "<root></root>";
     private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат DATA_TABLE";
 
-    public ObjectRs bind(String table) {
+    public ObjectRs convert(String table) {
         try {
             String resultXml = format(FormatUtils.prepareData(table));
-            return ObjectRs.builder().txt(resultXml).build();
+            return ObjectRs.builder().txt(FormatUtils.prettyFormatXML(resultXml)).build();
         } catch (Exception e) {
             return ObjectRs.builder().txt(EXCEPT).build();
         }
@@ -95,7 +97,7 @@ public class DataTableToXmlService {
     }
 
     //Конвертирование текста в DOM элемент
-    private  Document stringToDom() {
+    private Document stringToDom() {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -125,4 +127,3 @@ public class DataTableToXmlService {
         }
     }
 }
-

@@ -1,6 +1,5 @@
 package ru.taa.jsonformater.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -14,8 +13,10 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Сервис конвертирования Data table в Json
+ */
 @Service
-@Slf4j
 public class DataTableToJsonService {
 
     private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
@@ -25,12 +26,13 @@ public class DataTableToJsonService {
     private static final String EMPTY_ARRAY = "[]";
     private static final String EMPTY_OBJECT = "{}";
 
-    public ObjectRs format(String table) {
+
+    public ObjectRs convert(String table) {
         try {
-            String resultJson = bind(ROOT, FormatUtils.prepareData(table));
+            String resultJson = bind("{}", FormatUtils.prepareData(table));
             return ObjectRs.builder().txt(resultJson).build();
         } catch (Exception e) {
-            return ObjectRs.builder().txt(EXCEPT).build();
+            return ObjectRs.builder().txt("Ошибка разбора проверьте данные").build();
         }
     }
 
@@ -44,6 +46,14 @@ public class DataTableToJsonService {
         return jsonObject.toJSONString();
     }
 
+    /**
+     * Разбор объекта json
+     *
+     * @param jsonObj контекст json файла
+     * @param keys    массив ключей json
+     * @param idx     индекс для получения ключа
+     * @param val     значение для установки
+     */
     private void parseObj(JSONObject jsonObj, String[] keys, int idx, String val) {
         String key = keys[idx];
         Matcher matcher = ARRAY_PATTERN.matcher(key);
@@ -56,22 +66,25 @@ public class DataTableToJsonService {
                 array = (JSONArray) jsonObj.get(key);
             }
             if (keys.length - 1 == idx) {
-                setValue(array, val, i);
+                setOrDelValueArray(jsonObj, array, val, i);
                 return;
             }
-            Object value = getArrValue(array, i);
+            Object value = getNextArrValue(array, i);
             parseObj((JSONObject) value, keys, ++idx, val);
         } else {
             if (keys.length - 1 == idx) {
-                setObjectValue(jsonObj, key, val);
+                setOrDelObjValue(jsonObj, key, val);
                 return;
             }
-            Object value = getObjValue(jsonObj, key, val);
+            Object value = getNextObjValue(jsonObj, key);
             parseObj((JSONObject) value, keys, ++idx, val);
         }
     }
 
-    private Object getObjValue(JSONObject jsonObj, String key, String val) {
+    /**
+     * Получить объект json по ключу key
+     */
+    private Object getNextObjValue(JSONObject jsonObj, String key) {
         Object object = jsonObj.get(key);
         if (Objects.isNull(object)) {
             jsonObj.put(key, new JSONObject());
@@ -80,7 +93,10 @@ public class DataTableToJsonService {
         return object;
     }
 
-    private Object getArrValue(JSONArray array, int i) {
+    /**
+     * Получить массив json по индексу i
+     */
+    private Object getNextArrValue(JSONArray array, int i) {
         if (i < array.size()) {
             return array.get(i);
         } else {
@@ -93,7 +109,10 @@ public class DataTableToJsonService {
         }
     }
 
-    private void setObjectValue(JSONObject jsonObj, String key, String val) {
+    /**
+     * Установить, удалить или перезаписать значение объекта json
+     */
+    private void setOrDelObjValue(JSONObject jsonObj, String key, String val) {
         if (EMPTY_OBJECT.equals(val)) {
             jsonObj.put(key, new JSONObject());
         } else if (EMPTY_ARRAY.equals(val)) {
@@ -103,7 +122,10 @@ public class DataTableToJsonService {
         }
     }
 
-    private void setValue(JSONArray array, String val, int i) {
+    /**
+     * Установить, удалить или перезаписать значение массива json
+     */
+    private void setOrDelValueArray(JSONObject jsonObj, JSONArray array, String val, int i) {
         if (i < array.size()) {
             array.set(i, val);
         } else if (i == array.size()) {
@@ -112,4 +134,5 @@ public class DataTableToJsonService {
             throw new RuntimeException(String.format(EXCEPT_ARRAY_IDX, array, array.size(), i));
         }
     }
+
 }

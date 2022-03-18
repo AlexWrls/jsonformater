@@ -20,18 +20,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 
+/**
+ * Сервис конвертирования Xml в Data table
+ */
 @Service
 public class XmlToDataTableService {
 
-    private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат XML";
 
-    public ObjectRs bind(String xmlString) {
+    private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат XML";
+    private static final String ATTRIBUTE = "@";
+
+    public ObjectRs convert(String xmlString) {
         try {
-            Document doc = stringToDom(xmlString);
+            String input = xmlString.replaceAll("\\n", "");
+            input = input.replaceAll("(\\s)+", " ");
+            input = input.replaceAll(">(\\s)+<", "><");
+            String root = String.format("<root>%s</root>",input);
+            Document doc = stringToDom(root);
             final Node node = doc.getFirstChild();
             Map<String, String> map = new LinkedHashMap<>();
             List<String> path = new ArrayList<>();
-            path.add(node.getNodeName() + ".");
             parse(node, path, map, new LinkedList<>());
             StringBuilder sb = new StringBuilder();
             map.forEach((k, v) -> {
@@ -72,7 +80,7 @@ public class XmlToDataTableService {
                 if (item.getAttributes().getLength() != 0) {
                     for (int j = 0; j < item.getAttributes().getLength(); j++) {
                         final Node atr = item.getAttributes().item(j);
-                        path.add("_" + atr.getNodeName() + ".");
+                        path.add(ATTRIBUTE + atr.getNodeName() + ".");
                         map.put(pathToStr(path), atr.getNodeValue());
                         path.remove(path.size() - 1);
                     }
