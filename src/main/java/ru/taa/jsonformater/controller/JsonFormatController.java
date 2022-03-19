@@ -1,7 +1,6 @@
 package ru.taa.jsonformater.controller;
 
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +12,7 @@ import ru.taa.jsonformater.dto.ObjectRs;
 import ru.taa.jsonformater.service.DataTableToJsonService;
 import ru.taa.jsonformater.service.DataTableToXmlService;
 import ru.taa.jsonformater.service.JsonToDataTableService;
+import ru.taa.jsonformater.service.SqlToDataTableService;
 import ru.taa.jsonformater.service.XmlToDataTableService;
 import ru.taa.jsonformater.utils.FormatUtils;
 
@@ -25,6 +25,7 @@ public class JsonFormatController {
     private final DataTableToJsonService tableToJsonService;
     private final JsonToDataTableService jsonToDataTableService;
     private final XmlToDataTableService xmlToDataTableService;
+    private final SqlToDataTableService sqlToDataTableService;
 
     @GetMapping("/")
     public ModelAndView index() {
@@ -35,26 +36,26 @@ public class JsonFormatController {
 
     @PostMapping("/json_to_data_table")
     public ResponseEntity<?> jsonToDataTable(@RequestBody ObjectRq jsonObject) {
-        ObjectRs format = jsonToDataTableService.convert(jsonObject.getTxt());
-        return ResponseEntity.ok(format);
+        ObjectRs convert = jsonToDataTableService.convert(jsonObject.getTxt());
+        return ResponseEntity.ok(convert);
     }
 
     @PostMapping("/data_table_to_json")
     public ResponseEntity<?> dataTableToJson(@RequestBody ObjectRq jsonObject) {
-        ObjectRs format = tableToJsonService.convert(jsonObject.getTxt());
-        return ResponseEntity.ok(format);
+        ObjectRs convert = tableToJsonService.convert(jsonObject.getTxt());
+        return ResponseEntity.ok(convert);
     }
 
     @PostMapping("/xml_to_data_table")
     public ResponseEntity<?> xmlToDataTable(@RequestBody ObjectRq xmlObject) {
-        ObjectRs format = xmlToDataTableService.convert(xmlObject.getTxt());
-        return ResponseEntity.ok(format);
+        ObjectRs convert = xmlToDataTableService.convert(xmlObject.getTxt());
+        return ResponseEntity.ok(convert);
     }
 
     @PostMapping("/data_table_to_xml")
     public ResponseEntity<?> dataTableToXml(@RequestBody ObjectRq xmlObject) {
-        ObjectRs format = tableToXmlService.convert(xmlObject.getTxt());
-        return ResponseEntity.ok(format);
+        ObjectRs convert = tableToXmlService.convert(xmlObject.getTxt());
+        return ResponseEntity.ok(convert);
     }
 
     @PostMapping("/tab_print_xml")
@@ -63,5 +64,17 @@ public class JsonFormatController {
                 .txt(FormatUtils.prettyFormatXML(xmlObject.getTxt()))
                 .build();
         return ResponseEntity.ok(format);
+    }
+
+    @PostMapping("/query_to_table")
+    public ResponseEntity<?> queryToTable(@RequestBody ObjectRq query) {
+        ObjectRs convert = sqlToDataTableService.convert(query.getTxt(), false);
+        return ResponseEntity.ok(convert);
+    }
+
+    @PostMapping("/query_to_table_only_not_null")
+    public ResponseEntity<?> queryNotNullToTable(@RequestBody ObjectRq query) {
+        ObjectRs convert = sqlToDataTableService.convert(query.getTxt(), true);
+        return ResponseEntity.ok(convert);
     }
 }

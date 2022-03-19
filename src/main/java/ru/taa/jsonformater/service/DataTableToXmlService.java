@@ -24,7 +24,6 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -51,8 +50,8 @@ public class DataTableToXmlService {
     private String format(Map<String, String> params) {
         try {
             Document doc = stringToDom();
-            AtomicReference<Node> node = new AtomicReference<>(doc.getFirstChild());
             params.forEach((k, v) -> {
+                Node node = doc.getFirstChild();
                 String[] paths = k.split("\\.");
                 for (int i = 0; i < paths.length; i++) {
                     // Получить название и индекс нужного элемента
@@ -63,11 +62,9 @@ public class DataTableToXmlService {
                         elementName = matcher.group(1);
                         indexElement = Integer.parseInt(matcher.group(2));
                     }
-                    Element element = (Element) node.get();
-
+                    Element element = (Element) node;
                     if (elementName.startsWith(ATTRIBUTE)) {
                         element.setAttribute(elementName.substring(1), v);
-                        node.set(doc.getFirstChild());
                         continue;
                     }
                     // Получаем элемент по названию и индексу
@@ -77,7 +74,7 @@ public class DataTableToXmlService {
                         item = element.getOwnerDocument().createElement(elementName);
                         element.appendChild(item);
                     }
-                    node.set(item);
+                    node = item;
                     // Если последний элемент в массиве paths то установим значение или удалим
                     if (i == paths.length - 1) {
                         if (Objects.isNull(v)) {
@@ -85,7 +82,6 @@ public class DataTableToXmlService {
                         } else {
                             item.setTextContent(v);
                         }
-                        node.set(doc.getFirstChild());
                     }
                 }
             });

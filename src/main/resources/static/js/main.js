@@ -1,6 +1,7 @@
 // Переменные CodeMirror
-let table, json, tableXml, xml;
+let table, json, tableXml, xml, query, step;
 let fullWind;
+const textArea = []
 // Событие при загрузке страницы
 window.onload = function (event) {
     fullWind = false;
@@ -21,6 +22,13 @@ window.onload = function (event) {
         lineNumbers: true,
         mode: 'application/xml',
     });
+    query = CodeMirror.fromTextArea(document.getElementById('query'), {
+        lineNumbers: true,
+    });
+    step = CodeMirror.fromTextArea(document.getElementById('step'), {
+        lineNumbers: true,
+    });
+    textArea.push(table, json, tableXml, xml, query, step);
 // установка размера контента
     resize_window();
 // установка параметров размер шрифта
@@ -28,6 +36,7 @@ window.onload = function (event) {
     for (let i = 0; i < codeMirror.length; i++) {
         codeMirror[i].style.fontSize = '90%';
     }
+
 
 }
 
@@ -38,22 +47,20 @@ window.addEventListener('resize', resize_window);
 function resize_window() {
     const width = document.documentElement.clientWidth
     const height = document.documentElement.clientHeight
-    if (fullWind===false) {
-        table.setSize(((width / 2) - 150), (height - 200));
-        json.setSize(((width / 2) - 150), (height - 200));
-        tableXml.setSize(((width / 2) - 150), (height - 200));
-        xml.setSize(((width / 2) - 150), (height - 200));
+    if (fullWind === false) {
+        textArea.forEach(i => {
+            i.setSize(((width / 2) - 150), (height - 200));
+        })
     } else {
-        table.setSize(width-100, 600);
-        json.setSize(width-100, 600);
-        tableXml.setSize(width-100, 600);
-        xml.setSize(width-100, 600);
+        textArea.forEach(i => {
+            i.setSize(width - 100, 600);
+        })
     }
 }
 
 
 // ============================================================================
-// JSON Script
+// JSON converter script
 // ============================================================================
 function copy_json_value() {
     let text = json.getValue();
@@ -85,39 +92,33 @@ function copyToClipboard(str, infoLabel) {
 }
 
 function change_size(event) {
+    let btn_max = document.getElementsByClassName('btn-sm btn-secondary btn-max')
+    let btn_min = document.getElementsByClassName('btn-sm btn-secondary btn-min')
     if (event === '+') {
         fullWind = true
         const width = document.documentElement.clientWidth
-        table.setSize(((width) - 100), 600);
-        json.setSize(((width) - 100), 600);
-        table.setSize(((width) - 100), 600);
-        xml.setSize(((width) - 100), 600);
-        tableXml.setSize(((width) - 100), 600);
-        $('#btn-table-max').hide()
-        $('#btn-table-min').show()
-
-        $('#btn-json-max').hide()
-        $('#btn-json-min').show()
-
-        $('#btn-table-xml-max').hide()
-        $('#btn-table-xml-min').show()
-
-        $('#btn-xml-max').hide()
-        $('#btn-xml-min').show()
+        textArea.forEach(i => {
+            i.setSize(width - 100, 600);
+        })
+        for (let i = 0; i < btn_max.length; i++) {
+            console.log(btn_max[i])
+            btn_max[i].style.display = 'none';
+        }
+        for (let i = 0; i < btn_min.length; i++) {
+            console.log(btn_min[i])
+            btn_min[i].style.display = '';
+        }
     } else {
         fullWind = false
         resize_window();
-        $('#btn-table-max').show()
-        $('#btn-table-min').hide()
-
-        $('#btn-json-max').show()
-        $('#btn-json-min').hide()
-
-        $('#btn-table-xml-max').show()
-        $('#btn-table-xml-min').hide()
-
-        $('#btn-xml-max').show()
-        $('#btn-xml-min').hide()
+        for (let i = 0; i < btn_max.length; i++) {
+            console.log(btn_max[i])
+            btn_max[i].style.display = '';
+        }
+        for (let i = 0; i < btn_min.length; i++) {
+            console.log(btn_min[i])
+            btn_min[i].style.display = 'none';
+        }
     }
 }
 
@@ -193,7 +194,7 @@ function table_to_json() {
 }
 
 // ============================================================================
-// XML Script
+// XML converter script
 // ============================================================================
 function copy_xml_value() {
     let text = xml.getValue();
@@ -284,6 +285,46 @@ function tab_print_xml() {
             console.log("ERROR: ", e);
             $('#btn-xml').prop('disabled', false)
             $('#btn-xml-table').prop('disabled', false)
+        }
+    });
+}
+
+// ============================================================================
+// SQL query converter script
+// ============================================================================
+function copy_query_value() {
+    let text = query.getValue();
+    copyToClipboard(text, 'query-label')
+}
+
+function copy_step_value() {
+    let text = step.getValue();
+    copyToClipboard(text, 'step-label')
+}
+
+
+function query_to_table(e) {
+    let endpoint = '/query_to_table_only_not_null'
+    if (e === 'all') {
+        endpoint = '/query_to_table'
+    }
+    let data = {};
+    data["txt"] = query.getValue() + '\n';
+
+    $.ajax({
+        type: "POST",
+        contentType: "application/json",
+        url: endpoint,
+        data: JSON.stringify(data),
+        dataType: 'json',
+        timeout: 600000,
+        success: function (data) {
+            console.log("SUCCESS : ", data);
+            $('#step').val(data.txt)
+            step.getDoc().setValue(data.txt);
+        },
+        error: function (e) {
+            console.log("ERROR: ", e);
         }
     });
 }

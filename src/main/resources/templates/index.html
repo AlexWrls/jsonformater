@@ -18,16 +18,16 @@
     <script th:src="@{/js/codemirror.js}"></script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/perl.js}"></script>
-    <script th:src="@{/js/xml.mode.js}"></script>
+    <script th:src="@{/js/mode.js}"></script>
 
 </head>
 <body>
 <div class="container-fluid">
     <!--    <h6 class="footer">Форматирование в таблицу данных</h6>-->
     <div class="navbar-dark">
-        <button class="btn-secondary tablink" onclick="openPage('josnFormat', this, )" id="jsonOpen">Json Format
-        </button>
+        <button class="btn-secondary tablink" onclick="openPage('josnFormat', this, )" id="jsonOpen">Json Format</button>
         <button class="btn-secondary tablink" onclick="openPage('xmlFormat', this, )" id="xmlOpen">Xml Format</button>
+        <button class="btn-secondary tablink" onclick="openPage('queryFormat', this, )" id="queryOpen">Query Format</button>
     </div>
 
     <div id="josnFormat" class="tabcontent">
@@ -37,7 +37,10 @@
     <div id="xmlFormat" class="tabcontent">
         <div th:replace="parts/_xml :: xml_fragment()"/>
     </div>
-    <h6 class="footer">Version-1.2.1</h6>
+    <div id="queryFormat" class="tabcontent">
+        <div th:replace="parts/_query :: query_fragment()"/>
+    </div>
+    <h6 class="footer">Version-1.3.0</h6>
 </div>
 
 <script th:src="@{/js/main.js}"></script>
