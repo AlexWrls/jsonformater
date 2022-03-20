@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 import ru.taa.jsonformater.dto.ObjectRs;
 import ru.taa.jsonformater.utils.FormatUtils;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class SqlToDataTableService {
@@ -39,7 +42,11 @@ public class SqlToDataTableService {
             tableName = tableName.split("\\.")[1];
         }
         String[] str = query.substring(index + 1, query.lastIndexOf(")")).split(",");
-        for (String value : str) {
+        final List<String> collect = Arrays.stream(str)
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        for (String value : collect) {
             boolean notNull = false;
             if (value.contains("NOT NULL") || value.contains("not null")) {
                 notNull = true;
