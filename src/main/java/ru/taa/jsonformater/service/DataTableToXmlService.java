@@ -10,6 +10,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import ru.taa.jsonformater.dto.ObjectRs;
 import ru.taa.jsonformater.utils.FormatUtils;
+import ru.taa.jsonformater.utils.XmlUtils;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -33,23 +34,30 @@ import java.util.regex.Pattern;
 @Service
 @Slf4j
 public class DataTableToXmlService {
+
     private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
     private static final String ATTRIBUTE = "@";
-    private static final String ROOT = "<root></root>";
+    private static final String ROOT = "<hgfs></hgfs>";
     private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат DATA_TABLE";
 
     public ObjectRs convert(String table) {
         try {
             String resultXml = format(FormatUtils.prepareData(table));
-            return ObjectRs.builder().txt(FormatUtils.prettyFormatXML(resultXml)).build();
+            return ObjectRs.builder().txt(XmlUtils.prettyFormatXML(resultXml)).build();
         } catch (Exception e) {
             return ObjectRs.builder().txt(EXCEPT).build();
         }
     }
 
+    /**
+     * Собрать xml по параметрам params
+     *
+     * @param params параметры xml(путь и значение)
+     * @return строковое представление xml по входным парметрам
+     */
     private String format(Map<String, String> params) {
         try {
-            Document doc = stringToDom();
+            Document doc = XmlUtils.stringToDom(ROOT);
             params.forEach((k, v) -> {
                 Node node = doc.getFirstChild();
                 String[] paths = k.split("\\.");
@@ -85,41 +93,11 @@ public class DataTableToXmlService {
                     }
                 }
             });
-            return domToString(doc);
+            return XmlUtils.domToString(doc);
         } catch (Exception e) {
             log.error("Ошибка разбора параметров:\n" + params.toString());
         }
         return DataTableToXmlService.ROOT;
     }
 
-    //Конвертирование текста в DOM элемент
-    private Document stringToDom() {
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            StringReader reader = new StringReader(DataTableToXmlService.ROOT);
-            InputSource source = new InputSource(reader);
-            return builder.parse(source);
-        } catch (ParserConfigurationException | IOException | SAXException e) {
-            log.error("Ошибка конвертации строки в Document");
-            throw new RuntimeException("Error parsing String to Document");
-        }
-    }
-
-    //Конвертирование DOM элемента в строку
-    private static String domToString(Document doc) {
-        try {
-            StringWriter sw = new StringWriter();
-            TransformerFactory tf = TransformerFactory.newInstance();
-            Transformer transformer = tf.newTransformer();
-            transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-            transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
-            transformer.setOutputProperty(OutputKeys.ENCODING, "windows-1251");
-            transformer.transform(new DOMSource(doc), new StreamResult(sw));
-            return sw.toString();
-        } catch (Exception e) {
-            log.error("Ошибка конвертицм Document в строку");
-            throw new RuntimeException("Error converting Document to String");
-        }
-    }
 }

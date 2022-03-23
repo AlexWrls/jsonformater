@@ -1,6 +1,7 @@
 // Переменные CodeMirror
 let table, json, tableXml, xml, query, step;
 let fullWind;
+let appName = ''
 const textArea = []
 // Событие при загрузке страницы
 window.onload = function (event) {
@@ -36,8 +37,6 @@ window.onload = function (event) {
     for (let i = 0; i < codeMirror.length; i++) {
         codeMirror[i].style.fontSize = '90%';
     }
-
-
 }
 
 // событие при изменениии размера окна браузера
@@ -101,22 +100,18 @@ function change_size(event) {
             i.setSize(width - 100, 600);
         })
         for (let i = 0; i < btn_max.length; i++) {
-            console.log(btn_max[i])
             btn_max[i].style.display = 'none';
         }
         for (let i = 0; i < btn_min.length; i++) {
-            console.log(btn_min[i])
             btn_min[i].style.display = '';
         }
     } else {
         fullWind = false
         resize_window();
         for (let i = 0; i < btn_max.length; i++) {
-            console.log(btn_max[i])
             btn_max[i].style.display = '';
         }
         for (let i = 0; i < btn_min.length; i++) {
-            console.log(btn_min[i])
             btn_min[i].style.display = 'none';
         }
     }
@@ -147,7 +142,7 @@ function json_to_table() {
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: "/json_to_data_table",
+        url: appName + "/json_to_data_table",
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
@@ -174,7 +169,7 @@ function table_to_json() {
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: "/data_table_to_json",
+        url: appName + "/data_table_to_json",
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
@@ -206,16 +201,19 @@ function copy_table_xml_value() {
     copyToClipboard(text, 'table-xml-label')
 }
 
-
-function xml_to_table() {
+function xml_to_table(e) {
     let data = {};
+    let endPoint = '/xml_to_data_table'
+    if (e === 'cut') {
+        endPoint = '/xml_to_data_table_cut_name_space'
+    }
     data["txt"] = xml.getValue();
     $('#btn-xml').prop('disabled', true)
     $('#btn-xml-table').prop('disabled', true)
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: "/xml_to_data_table",
+        url: appName + endPoint,
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
@@ -242,7 +240,7 @@ function table_to_xml() {
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: "/data_table_to_xml",
+        url: appName + "/data_table_to_xml",
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
@@ -270,7 +268,7 @@ function tab_print_xml() {
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: "/tab_print_xml",
+        url: appName + "/tab_print_xml",
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
@@ -303,30 +301,52 @@ function copy_step_value() {
 }
 
 
-function query_to_table(e) {
+function query_to_table(e, prop) {
     let endpoint = '/query_to_table_only_not_null'
     if (e === 'all') {
         endpoint = '/query_to_table'
     }
     let data = {};
     data["txt"] = query.getValue() + '\n';
-
     $.ajax({
         type: "POST",
         contentType: "application/json",
-        url: endpoint,
+        url: appName + endpoint,
         data: JSON.stringify(data),
         dataType: 'json',
         timeout: 600000,
         success: function (data) {
             console.log("SUCCESS : ", data);
-            $('#step').val(data.txt)
-            step.getDoc().setValue(data.txt);
+            let head = getHeadStep(data.tableName, prop)
+            let table = getTableStep(data.columns, data.values)
+            $('#step').val(head + table)
+            step.getDoc().setValue(head + table);
         },
         error: function (e) {
             console.log("ERROR: ", e);
         }
     });
+}
+
+function getTableStep(columns, values) {
+    let table = '';
+    columns.forEach(i => {
+        table = table + '| ' + i
+    })
+    table = table + ' |\n'
+    values.forEach(i => {
+        table = table + '| ' + i
+    })
+    table = table + ' |'
+    return table;
+}
+
+function getHeadStep(name, prop) {
+    if (prop === 'create') {
+        return 'Допустим таблица ' + name + ' имеет записи:\n';
+    } else {
+        return 'Тогда таблица ' + name + ' состоит из записей:\n'
+    }
 }
 
 // скрытие контента при нажатии на кнопки меню (Xml | Json)

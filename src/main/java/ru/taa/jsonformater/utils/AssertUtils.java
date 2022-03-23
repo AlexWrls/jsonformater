@@ -1,4 +1,5 @@
 package ru.taa.jsonformater.utils;
+
 import lombok.experimental.UtilityClass;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

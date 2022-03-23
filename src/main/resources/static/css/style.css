@@ -31,7 +31,8 @@ body {
     border: none;
     outline: none;
     cursor: pointer;
-    padding: 5px 5px;
+    padding: 3px 3px;
+    margin: 2px;
     font-size: 17px;
     width: 200px;
 }

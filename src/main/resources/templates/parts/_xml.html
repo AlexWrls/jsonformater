@@ -1,4 +1,4 @@
-<div xmlns:th="http://www.w3.org/1999/xhtml" th:fragment="xml_fragment()">
+<div th:fragment="xml_fragment()" xmlns:th="http://www.w3.org/1999/xhtml">
 
     <div class="row">
         <div class="col">
@@ -24,10 +24,13 @@
             </div>
         </div>
         <div class="col-1">
-            <button class="btn-sm btn-primary mt-5" style="width: 100%" id="btn-xml" onclick="xml_to_table()">
+            <button class="btn-sm btn-primary mt-5" style="width: 100%" onclick="xml_to_table()">
                 <b>table-></b>
             </button>
-            <button class="btn-sm btn-primary mt-2 mb-5" style="width: 100%" id="btn-xml-table"
+            <button class="btn-sm btn-primary mt-2 mb-5" style="width: 100%" onclick="xml_to_table('cut')">
+                <b>table cut-></b>
+            </button>
+            <button class="btn-sm btn-primary mt-2 mb-5" style="width: 100%"
                     onclick="table_to_xml()">
                 <b><-xml</b>
             </button>
@@ -41,7 +44,7 @@
                      <button class="btn-sm btn-secondary" onclick="change_text_size(3,+1)">A+</button>
                      <button class="btn-sm btn-secondary" onclick="change_text_size(3,-1)">A-</button>
                       <button class="btn-sm btn-secondary btn-max"
-                          onclick="change_size('+')"><b>[<->]</b></button>
+                              onclick="change_size('+')"><b>[<->]</b></button>
                        <button class="btn-sm btn-secondary btn-min" style="display: none"
                                onclick="change_size()"><b>->[]<-</b></button>
                     </span>

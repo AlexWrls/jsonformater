@@ -1,0 +1,36 @@
+<div th:fragment="modal_about()" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Описание</h4>
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p><b>Json Format</b></p>
+                <p><span class="about-btn">table-></span> Конвертирование json объекта в data table</p>
+                <p><span class="about-btn"><-json</span> Конвертирование Data table в json</p>
+                <p>Пример json: { "путь до параметра" : "значение" }</p>
+                <p>Пример data table: | путь до параметра | значение |</p>
+                <hr>
+                <p><b>Xml Format</b></p>
+                <p><span class="about-btn">table-></span> Конвертирование xml объекта в data table</p>
+                <p><span class="about-btn">table cut-></span> Конвертирование xml объекта в data table (без name-space в названии тегов и атрибутов)</p>
+                <p><span class="about-btn"><-xml</span> Конвертирование Data table в xml</p>
+                <p>Пример xml: &lt;root&gt;&lt;node&gt;значение&lt;/node&gt;&lt;/root&gt;</p>
+                <p>Пример data table: | root.node | значение |</p>
+                <hr>
+                <p><b>Query Format</b></p>
+                <p><span class="about-btn">create all-></span>Получить шаг создания таблицы из query.sql(Все поля)</p>
+                <p><span class="about-btn">create N/N-></span>Получить шаг создания таблицы из query.sql(только поля not
+                    null)</p>
+                <p><span class="about-btn">check all-></span>Получить шаг проверки таблицы из query.sql(Все поля)</p>
+                <p><span class="about-btn">check N/N-></span>Получить шаг проверки таблицы из query.sql(только поля not
+                    null)</p>
+                <p style="color: #144c7b">поля not null обозначены знаком <b>*</b></p>
+            </div>
+            <div class="modal-footer">
+                <a href="mailto:atrof86@yandex.ru">atrof86@yandex.ru</a>
+            </div>
+        </div>
+    </div>
+</div>

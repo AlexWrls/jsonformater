@@ -34,15 +34,21 @@ public class JsonToDataTableService {
             map.forEach((k, v) -> {
                 sb.append("| ").append(k).append(" | ").append(v).append(" |").append("\n");
             });
-
             return ObjectRs.builder().txt(sb.toString()).build();
         } catch (Exception e) {
             return ObjectRs.builder().txt(EXCEPT).build();
         }
-
     }
 
-    private static void parseObj(JSONObject jsonObj, List<String> path, Map<String, String> map) {
+    /**
+     * Разбор json объекта с корневого jsonObj для получения параметров params (путь и значение))
+     * используется рекурсивный обход дерева элементов
+     *
+     * @param jsonObj элемент json для разбора
+     * @param path    список для формирования пути
+     * @param params  список парметров разобранных элемнтов xml (путь и значение)
+     */
+    private static void parseObj(JSONObject jsonObj, List<String> path, Map<String, String> params) {
         Set<String> keys = jsonObj.keySet();
         for (String key : keys) {
             Object value = jsonObj.get(key);
@@ -50,47 +56,61 @@ public class JsonToDataTableService {
                 JSONObject obj = (JSONObject) value;
                 path.add(key + ".");
                 if (obj.size() == 0) {
-                    map.put(concatPath(path), EMPTY_OBJECT);
+                    params.put(concatPath(path), EMPTY_OBJECT);
                     path.remove(path.size() - 1);
                     continue;
                 }
-                parseObj(obj, path, map);
+                parseObj(obj, path, params);
                 path.remove(path.size() - 1);
             } else if (value instanceof JSONArray) {
                 JSONArray jsonArray = (JSONArray) value;
                 path.add(key);
                 if (jsonArray.size() == 0) {
-                    map.put(concatPath(path), EMPTY_ARRAY);
+                    params.put(concatPath(path), EMPTY_ARRAY);
                     path.remove(path.size() - 1);
                     continue;
                 }
-                parseArr(jsonArray, path, map);
+                parseArr(jsonArray, path, params);
                 path.remove(path.size() - 1);
             } else {
                 path.add(key);
-                map.put(concatPath(path), value.toString());
+                params.put(concatPath(path), value.toString());
                 path.remove(path.size() - 1);
             }
         }
     }
 
-    private static void parseArr(JSONArray jsonArr, List<String> path, Map<String, String> map) {
+    /**
+     * Разбор json массива jsonArr для получения параметров params (путь и значение))
+     * используется рекурсивный обход дерева элементов
+     *
+     * @param jsonArr массив json для разбора
+     * @param path    список для формирования пути
+     * @param params  список парметров разобранных элемнтов xml (путь и значение)
+     */
+    private static void parseArr(JSONArray jsonArr, List<String> path, Map<String, String> params) {
         for (int i = 0; i < jsonArr.size(); i++) {
             Object val = jsonArr.get(i);
             if (val instanceof JSONObject) {
                 path.add("[" + i + "].");
-                parseObj((JSONObject) val, path, map);
+                parseObj((JSONObject) val, path, params);
                 path.remove(path.size() - 1);
             } else if (val instanceof JSONArray) {
-                parseArr((JSONArray) jsonArr.get(i), path, map);
+                parseArr((JSONArray) jsonArr.get(i), path, params);
             } else {
                 path.add("[" + i + "]");
-                map.put(concatPath(path), val.toString());
+                params.put(concatPath(path), val.toString());
                 path.remove(path.size() - 1);
             }
         }
     }
 
+    /**
+     * Объединяет список пути в строку с разделением '.'
+     *
+     * @param paths список с элементами названия пути
+     * @return строка объединненого списка
+     */
     private static String concatPath(List<String> paths) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < paths.size() - 1; i++) {

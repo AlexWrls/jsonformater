@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 import ru.taa.jsonformater.dto.ObjectRq;
 import ru.taa.jsonformater.dto.ObjectRs;
+import ru.taa.jsonformater.dto.QueryRs;
 import ru.taa.jsonformater.service.DataTableToJsonService;
 import ru.taa.jsonformater.service.DataTableToXmlService;
 import ru.taa.jsonformater.service.JsonToDataTableService;
 import ru.taa.jsonformater.service.SqlToDataTableService;
 import ru.taa.jsonformater.service.XmlToDataTableService;
-import ru.taa.jsonformater.utils.FormatUtils;
+import ru.taa.jsonformater.utils.XmlUtils;
 
 
 @RestController
 @AllArgsConstructor
 public class JsonFormatController {
-
     private final DataTableToXmlService tableToXmlService;
     private final DataTableToJsonService tableToJsonService;
     private final JsonToDataTableService jsonToDataTableService;
@@ -48,7 +48,13 @@ public class JsonFormatController {
 
     @PostMapping("/xml_to_data_table")
     public ResponseEntity<?> xmlToDataTable(@RequestBody ObjectRq xmlObject) {
-        ObjectRs convert = xmlToDataTableService.convert(xmlObject.getTxt());
+        ObjectRs convert = xmlToDataTableService.convert(xmlObject.getTxt(), false);
+        return ResponseEntity.ok(convert);
+    }
+
+    @PostMapping("/xml_to_data_table_cut_name_space")
+    public ResponseEntity<?> xmlToDataTableCutNameSpace(@RequestBody ObjectRq xmlObject) {
+        ObjectRs convert = xmlToDataTableService.convert(xmlObject.getTxt(), true);
         return ResponseEntity.ok(convert);
     }
 
@@ -60,21 +66,20 @@ public class JsonFormatController {
 
     @PostMapping("/tab_print_xml")
     public ResponseEntity<?> tabPrintXml(@RequestBody ObjectRq xmlObject) {
-        ObjectRs format = ObjectRs.builder()
-                .txt(FormatUtils.prettyFormatXML(xmlObject.getTxt()))
-                .build();
+        String xml = XmlUtils.prettyFormatXML(xmlObject.getTxt());
+        ObjectRs format = ObjectRs.builder().txt(xml).build();
         return ResponseEntity.ok(format);
     }
 
     @PostMapping("/query_to_table")
     public ResponseEntity<?> queryToTable(@RequestBody ObjectRq query) {
-        ObjectRs convert = sqlToDataTableService.convert(query.getTxt(), false);
+        QueryRs convert = sqlToDataTableService.convert(query.getTxt(), false);
         return ResponseEntity.ok(convert);
     }
 
     @PostMapping("/query_to_table_only_not_null")
     public ResponseEntity<?> queryNotNullToTable(@RequestBody ObjectRq query) {
-        ObjectRs convert = sqlToDataTableService.convert(query.getTxt(), true);
+        QueryRs convert = sqlToDataTableService.convert(query.getTxt(), true);
         return ResponseEntity.ok(convert);
     }
 }

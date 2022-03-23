@@ -13,22 +13,28 @@
     <link type="text/css" rel="stylesheet" th:href="@{/css/darcula.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/idea.css}">
     <link type="text/css" rel="stylesheet" th:href="@{/css/style.css}">
+    <link type="text/css" rel="stylesheet" th:href="@{/css/modal.css}">
     <!-- JS -->
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/codemirror.js}"></script>
     <script th:src="@{/js/jquery.min.js}"></script>
     <script th:src="@{/js/perl.js}"></script>
-    <script th:src="@{/js/mode.js}"></script>
+    <script th:src="@{/js/xml.js}"></script>
 
 </head>
 <body>
 <div class="container-fluid">
     <!--    <h6 class="footer">Форматирование в таблицу данных</h6>-->
     <div class="navbar-dark">
-        <button class="btn-secondary tablink" onclick="openPage('josnFormat', this, )" id="jsonOpen">Json Format</button>
+        <button class="btn-secondary tablink" onclick="openPage('josnFormat', this, )" id="jsonOpen">Json Format
+        </button>
         <button class="btn-secondary tablink" onclick="openPage('xmlFormat', this, )" id="xmlOpen">Xml Format</button>
-        <button class="btn-secondary tablink" onclick="openPage('queryFormat', this, )" id="queryOpen">Query Format</button>
+        <button class="btn-secondary tablink" onclick="openPage('queryFormat', this, )" id="queryOpen">Query Format
+        </button>
+        <!-- Trigger/Open The Modal -->
+        <button class="btn-secondary tablink" style="position: fixed; right: 0" id="myBtn">About</button>
     </div>
+
 
     <div id="josnFormat" class="tabcontent">
         <div th:replace="parts/_json :: json_fragment()"/>
@@ -42,8 +48,11 @@
     </div>
     <h6 class="footer">Version-1.3.0</h6>
 </div>
+<!-- The Modal -->
+<div th:replace="parts/_modal :: modal_about()"/>
 
 <script th:src="@{/js/main.js}"></script>
+<script th:src="@{/js/modal.js}"></script>
 <script>
     setTimeout(function () {
         document.getElementById('jsonOpen').click();

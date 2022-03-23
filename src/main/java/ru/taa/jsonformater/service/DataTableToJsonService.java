@@ -20,7 +20,6 @@ import java.util.regex.Pattern;
 public class DataTableToJsonService {
 
     private static final Pattern ARRAY_PATTERN = Pattern.compile("^(.*)\\[(\\d+)]$");
-    private static final String ROOT = "{}";
     private static final String EXCEPT = "Ошибка конвертации, данные должны иметь формат DATA_TABLE";
     private static final String EXCEPT_ARRAY_IDX = "Нарушен порядок добавления в массив %s, ожидаемый индекс:%d заданный индекс:%d";
     private static final String EMPTY_ARRAY = "[]";
@@ -29,15 +28,15 @@ public class DataTableToJsonService {
 
     public ObjectRs convert(String table) {
         try {
-            String resultJson = bind("{}", FormatUtils.prepareData(table));
+            String resultJson = bind(FormatUtils.prepareData(table));
             return ObjectRs.builder().txt(resultJson).build();
         } catch (Exception e) {
-            return ObjectRs.builder().txt("Ошибка разбора проверьте данные").build();
+            return ObjectRs.builder().txt(EXCEPT).build();
         }
     }
 
-    private String bind(String content, Map<String, String> params) throws ParseException {
-        JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(content);
+    private String bind(Map<String, String> params) throws ParseException {
+        JSONObject jsonObject = (JSONObject) JSONValue.parseWithException(EMPTY_OBJECT);
         params.forEach((key, val) -> {
             String[] keys = key.split("\\.");
             int idx = 0;
